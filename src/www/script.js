@@ -1,17 +1,31 @@
-import { html, reactive } from '@arrow-js/core';
-import ms from 'ms';
+import * as TableInfoPage from './pages/table-info'
+import config from './twind.config'
+import { html } from '@arrow-js/core'
+import { install } from '@twind/core'
 
-const appElement = document.getElementById('app');
+install(config)
 
-const data = reactive({
-  onlineFor: 0,
-});
+let mount
 
-const template = html`Jarvis:
-  <em>I've been online, for ${() => ms(data.onlineFor * 1000)} Sir.</em>`;
+// We don't mind the whole page loading, since most of
+// the state is coming from the URL
+switch (document.location.pathname) {
+  case '/tables': {
+    mount = TableInfoPage.Page
+    TableInfoPage.init()
+    break
+  }
+  case '/': {
+    mount = html`<a href="/tables">Tables</a>`
+    break
+  }
+  default: {
+    mount = html`<div>
+      <p>You look lost</p>
+      <a href="/">Let's take you back home</a>
+    </div>`
+  }
+}
 
-template(appElement);
-
-setInterval(() => {
-  data.onlineFor += 1;
-}, 1000);
+const appElement = document.getElementById('app')
+mount(appElement)
