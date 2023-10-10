@@ -1,0 +1,44 @@
+{
+  "name": "knex-studio",
+  "version": "0.0.0",
+  "description": "A knex.js data explorer",
+  "module": "./src/index.js",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon dummy-server.js --ignore ./src/www/dist",
+    "build": "sucrase --transforms='jsx,imports' -d dist src; pnpm copy",
+    "copy": "pnpm copy:runtime",
+    "copy:runtime": "copyfiles -u 1 './src/runtime/**/*' ./dist"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./cjs",
+    "./src"
+  ],
+  "keywords": [],
+  "author": "reaper<ahoy@barelyhuman.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@arrow-js/core": "1.0.0-alpha.9",
+    "@fastify/static": "^6.11.2",
+    "fastify": "^4.23.2",
+    "ms": "^2.1.3"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.4.1",
+    "esbuild": "^0.19.4",
+    "knex": "^3.0.1",
+    "sucrase": "^3.34.0"
+  },
+  "peerDependencies": {
+    "knex": "^3.0.1"
+  }
+}
