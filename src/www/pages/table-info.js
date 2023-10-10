@@ -2,12 +2,19 @@ import { reactive } from '@arrow-js/core'
 import { html } from '@arrow-js/core'
 
 // Model
+const TABLE_STATES = {
+  DATA: 0,
+  STRUCTURE: 1,
+}
+
 const pageState = reactive({
   activeTableName: '',
-  tableSearch: '',
-  headers: [],
+  tableState: TABLE_STATES.DATA,
+  tableSearchTerm: '',
+  dataHeaders: [],
   tables: [],
-  rows: [],
+  dataRows: [],
+  structureRows: [],
   total: 0,
   page: 1,
 })
@@ -40,7 +47,9 @@ const TableListCard = html`<div class="bg-white flex flex-col gap-2">
     <ul class="flex flex-col gap-2">
       ${() => {
         const filteredTables = pageState.tables.filter(x =>
-          pageState.tableSearch ? x.startsWith(pageState.tableSearch) : true
+          pageState.tableSearchTerm
+            ? x.startsWith(pageState.tableSearchTerm)
+            : true
         )
         return filteredTables.map(x => TableLink({ name: x }))
       }}
@@ -51,39 +60,91 @@ const TableListCard = html`<div class="bg-white flex flex-col gap-2">
 const TableHeader = ({ label = '' } = {}) =>
   html`<th scope="col" class="px-6 border border-zinc-100 py-3">${label}</th>`
 
-const TableRows = ({ data = [] } = {}) =>
+const TableRows = ({ headers = [], data = [] } = {}) =>
   data.map(rowItem => {
     const keys = Object.keys(rowItem).sort((x, y) => {
-      return pageState.headers.indexOf(x) - pageState.headers.indexOf(y)
+      return headers.indexOf(x) - headers.indexOf(y)
     })
     return html`<tr class="bg-white hover:bg-zinc-100 border-b">
       ${() =>
-        keys.map(
-          k =>
-            html`<td class="border border-zinc-100 px-6 py-4">
-              ${rowItem[k]}
-            </td>`
-        )}
+        keys.map(k => {
+          const value =
+            rowItem[k] == null || rowItem[k] == undefined ? '-' : rowItem[k]
+          return html`<td class="border border-zinc-100 px-6 py-4">
+            ${value}
+          </td>`
+        })}
     </tr>`
   })
 
-const TableDisplay = html`<div class="flex-[5] relative p-2 overflow-x-auto">
-  <table class="w-full border-collapse text-sm text-left text-zinc-500">
+const TableDisplayData = ({} = {}) => {
+  const isDataActive = pageState.tableState === TABLE_STATES.DATA
+  let activeHeaders = pageState.dataHeaders
+  let dataRows = pageState.dataRows
+  if (!isDataActive) {
+    dataRows = pageState.structureRows
+    const _possibleKeys = new Set()
+    pageState.structureRows.forEach(x => {
+      Object.keys(x).forEach(k => _possibleKeys.add(k))
+    })
+    activeHeaders = [..._possibleKeys]
+  }
+  return html`<table
+    class="w-full border-collapse text-sm text-left text-zinc-500"
+  >
     <thead class="text-xs text-zinc-700 bg-zinc-50">
       <tr>
-        ${() => pageState.headers.map(x => TableHeader({ label: x }))}
+        ${() => {
+          return activeHeaders.map(x => TableHeader({ label: x }))
+        }}
       </tr>
     </thead>
     <tbody>
-      ${() => TableRows({ data: pageState.rows })}
+      ${() =>
+        TableRows({
+          headers: activeHeaders,
+          data: dataRows,
+        })}
     </tbody>
-  </table>
-</div>`
+  </table>`
+}
+
+const TableStateToggle = ({} = {}) => {
+  const isDataActive = pageState.tableState === TABLE_STATES.DATA
+  const isStructureActive = !isDataActive
+
+  return html`<div
+    class="bg-zinc-200 text-sm text-zinc-500 leading-none border-2 border-zinc-200 inline-flex mb-2"
+  >
+    <button
+      class="${isDataActive
+        ? 'bg-white'
+        : ''} inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-zinc-800 focus:text-zinc-800 px-4 py-2 active"
+      @click="${() => (pageState.tableState = TABLE_STATES.DATA)}"
+    >
+      <span>Data</span>
+    </button>
+    <button
+      class="${isStructureActive
+        ? 'bg-white'
+        : ''} inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-zinc-800 focus:text-zinc-800 px-4 py-2"
+      @click="${() => (pageState.tableState = TABLE_STATES.STRUCTURE)}"
+    >
+      <span>Structure</span>
+    </button>
+  </div>`
+}
+
+const TableDisplay = ({} = {}) => {
+  return html`<div class="flex-[5] relative p-2 overflow-x-auto">
+    ${() => TableStateToggle()} ${() => TableDisplayData()}
+  </div>`
+}
 
 export const Page = html`
   <div class="flex gap-1">
     <div class="flex-1 p-2 max-w-[250px]">${TableListCard}</div>
-    ${() => (pageState.activeTableName ? TableDisplay : html``)}
+    ${() => (pageState.activeTableName ? TableDisplay() : html``)}
   </div>
 `
 
@@ -100,9 +161,9 @@ export async function init() {
 
 async function fetchTableData(tableName) {
   const info = await fetch(`/api/tables/${tableName}/info`).then(d => d.json())
-  pageState.headers = info.headers
-  pageState.rows = info.data.rows
-  console.log({ info })
+  pageState.dataHeaders = info.headers
+  pageState.dataRows = info.data.rows
+  pageState.structureRows = info.columns
 }
 
 async function fetchTables() {
@@ -121,5 +182,5 @@ async function fetchTables() {
 }
 
 function onTableSearch(e) {
-  pageState.tableSearch = e.target.value
+  pageState.tableSearchTerm = e.target.value
 }

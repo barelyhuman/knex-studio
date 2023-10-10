@@ -29,6 +29,19 @@ export default function DatabaseAdaptorKnex(app) {
     return colData.map(x => x.column)
   }
 
+  _.getTableStructure = async tableName => {
+    const colData = await getInspector(db).columns(tableName)
+    const columnInfo = await Promise.all(
+      colData.map(async x => {
+        const colInfo = await getInspector(db).columnInfo(tableName, x.column)
+        colInfo.column_name = colInfo.name
+        return colInfo
+      })
+    )
+
+    return columnInfo
+  }
+
   _.getTableData = async tableName => {
     const offset = 0
     const limit = 10
@@ -40,20 +53,5 @@ export default function DatabaseAdaptorKnex(app) {
       },
       rows,
     }
-  }
-
-  _.getTableInfo = async tableName => {
-    const tableInfo = {
-      columns: [],
-    }
-
-    const colData = await getInspector(db).columns(tableName)
-
-    for (let col of colData) {
-      const colData = await getInspector(db).columnInfo(tableName, col.column)
-      tableInfo.columns.push(colData)
-    }
-
-    return tableInfo
   }
 }
