@@ -1,3 +1,4 @@
+import * as RawSQL from './pages/rawsql'
 import * as TableInfoPage from './pages/table-info'
 import config from './twind.config'
 import { html } from '@arrow-js/core'
@@ -10,6 +11,11 @@ let mount
 // We don't mind the whole page loading, since most of
 // the state is coming from the URL
 switch (document.location.pathname) {
+  case '/sql': {
+    mount = RawSQL.Page
+    RawSQL.init()
+    break
+  }
   case '/tables': {
     mount = TableInfoPage.Page
     TableInfoPage.init()

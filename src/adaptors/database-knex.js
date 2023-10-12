@@ -54,4 +54,9 @@ export default function DatabaseAdaptorKnex(app) {
       rows,
     }
   }
+
+  _.runRawQuery = async query => {
+    const data = await db.raw(query)
+    return data
+  }
 }

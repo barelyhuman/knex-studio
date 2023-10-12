@@ -71,7 +71,14 @@ const TableRows = ({ headers = [], data = [] } = {}) =>
           const value =
             rowItem[k] == null || rowItem[k] == undefined ? '-' : rowItem[k]
           return html`<td class="border border-zinc-100 px-6 py-4">
-            ${value}
+            <div contenteditable @input="${e => {
+              // TODO:
+              // e.target.innerText => Sanitize Input
+              // also need to keep record of the modifications
+              // so that we can show what has changed (something similar to TablePlus)
+            }}">
+              ${value}
+            </d>
           </td>`
         })}
     </tr>`
@@ -114,7 +121,7 @@ const TableStateToggle = ({} = {}) => {
   const isStructureActive = !isDataActive
 
   return html`<div
-    class="bg-zinc-200 text-sm text-zinc-500 leading-none border-2 border-zinc-200 inline-flex mb-2"
+    class="bg-zinc-200 text-sm text-zinc-500 leading-none border-2 border-zinc-200 inline-flex"
   >
     <button
       class="${isDataActive
@@ -136,8 +143,14 @@ const TableStateToggle = ({} = {}) => {
 }
 
 const TableDisplay = ({} = {}) => {
-  return html`<div class="flex-[5] relative p-2 overflow-x-auto">
-    ${() => TableStateToggle()} ${() => TableDisplayData()}
+  return html`<div
+    class="flex-[5] relative p-2 overflow-x-auto flex flex-col gap-2"
+  >
+    <div class="flex gap-2 items-center">
+      ${() => TableStateToggle()}
+      <a href="/sql">Execute SQL</a>
+    </div>
+    ${() => TableDisplayData()}
   </div>`
 }
 

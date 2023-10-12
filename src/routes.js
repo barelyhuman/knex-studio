@@ -41,4 +41,21 @@ export default function routeRegister(app) {
       console.error(err)
     }
   })
+
+  router.post('/api/exec', async (req, res) => {
+    const query = req.body
+    // TODO: santize query , parse and break down based on the connection information
+
+    const rows = await app.functions.Database.runRawQuery(query)
+    let headers = []
+
+    rows.forEach(row => {
+      headers = headers.concat([...Object.keys(row)]).flat(2)
+    })
+
+    return res.send({
+      headers: [...new Set(headers)],
+      rows: rows,
+    })
+  })
 }
