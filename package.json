@@ -33,9 +33,15 @@
     "@twind/core": "^1.1.3",
     "@twind/preset-autoprefix": "^1.0.7",
     "@twind/preset-tailwind": "^1.1.4",
+    "acorn": "^8.10.0",
+    "astring": "^1.8.6",
     "fastify": "^4.23.2",
+    "fastify-plugin": "^4.5.1",
     "knex-schema-inspector": "^3.0.1",
-    "ms": "^2.1.3"
+    "ms": "^2.1.3",
+    "rollup": "^4.1.4",
+    "arrow-render-to-string": "0.0.1-beta.4",
+    "uglify-js": "^3.17.4"
   },
   "devDependencies": {
     "@barelyhuman/prettier-config": "^1.1.0",
@@ -47,7 +53,8 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "sqlite3": "^5.1.6",
-    "sucrase": "^3.34.0"
+    "sucrase": "^3.34.0",
+    "tiny-glob": "^0.2.9"
   },
   "peerDependencies": {
     "knex": "^3.0.1"

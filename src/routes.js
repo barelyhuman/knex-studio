@@ -1,9 +1,26 @@
+import { hash } from './lib/hash.js'
+import { clientRender } from './lib/plugins/esbuild-client-render.js'
+import routeConfig from './routes.config.js'
+import { html } from '@arrow-js/core'
+import { renderToString } from 'arrow-render-to-string'
+import esbuild from 'esbuild'
+import { readFile } from 'fs/promises'
 import _ from 'lodash'
+import { basename, join } from 'path'
 
 const { pick } = _
 
-export default function routeRegister(app) {
+let baseLayoutHTML
+
+export default async function routeRegister(app) {
+  baseLayoutHTML = await readFile(
+    join(app.sourceDirectory, 'www/index.html'),
+    'utf8'
+  )
+
   const router = app.router
+
+  await registerFromConfig(app)
 
   router.get('/api/tables', async (req, res) => {
     try {
@@ -58,4 +75,76 @@ export default function routeRegister(app) {
       rows: rows,
     })
   })
+}
+
+async function registerFromConfig(app) {
+  const pathMappers = Object.entries(routeConfig).map(
+    async ([path, componentPath]) => {
+      const _componentPath = join(app.sourceDirectory, componentPath)
+      const componentModule = await import(_componentPath)
+      const _hashedName = hash(_componentPath)
+      const islandsOutFile = join(
+        app.sourceDirectory,
+        'www',
+        'dist',
+        'islands',
+        '' + _hashedName + '.js'
+      )
+
+      // 1st pass, remove node deps and build
+      await esbuild.build({
+        entryPoints: [_componentPath],
+        bundle: true,
+        outfile: islandsOutFile,
+        platform: 'node',
+        minify: true,
+        format: 'esm',
+        treeShaking: true,
+        plugins: [clientRender()],
+      })
+
+      // 2nd pass, build specifically for the browser
+      await esbuild.build({
+        entryPoints: [islandsOutFile],
+        bundle: true,
+        allowOverwrite: true,
+        outfile: islandsOutFile,
+        platform: 'browser',
+        minify: true,
+        format: 'esm',
+        treeShaking: true,
+        plugins: [],
+      })
+
+      app.router.get(path, async (request, reply) => {
+        const meta = {
+          path: join('/', 'islands', basename(islandsOutFile)),
+          state: componentModule.state,
+        }
+
+        'onServer' in componentModule &&
+          (await componentModule.onServer({
+            app,
+            params: request.params,
+            query: request.query,
+          }))
+
+        const _wrapper = html` ${componentModule.view()} `
+        const finalTmp = baseLayoutHTML
+          .replace('%app%', renderToString(_wrapper))
+          .replace(
+            '%scripts%',
+            `
+              <script type="text/json" id="_meta">
+                ${JSON.stringify(meta)}
+              </script>
+            `
+          )
+        reply.header(`content-type`, 'text/html')
+        reply.send(finalTmp)
+      })
+    }
+  )
+
+  await Promise.all(pathMappers)
 }

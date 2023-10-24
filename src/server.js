@@ -1,9 +1,9 @@
 import DatabaseAdaptorKnex from './adaptors/database-knex.js'
 import { app } from './app.js'
+import { fastifyArrow } from './lib/plugins/fastify-arrow.js'
 import routeRegister from './routes.js'
 import fstatic from '@fastify/static'
 import fastify from 'fastify'
-import { createReadStream } from 'node:fs'
 import { join } from 'node:path'
 
 const defaults = {
@@ -18,6 +18,10 @@ export const createServer = _knexInstance => {
 
   app.addModule(DatabaseAdaptorKnex).addModule(routeRegister)
 
+  server.register(fastifyArrow, {
+    sourceDirectory: app.sourceDirectory,
+  })
+
   /**
    * @params {number} port
    */
@@ -31,9 +35,15 @@ export const createServer = _knexInstance => {
       root: join(app.sourceDirectory, 'www/dist'),
     })
 
-    server.get('/*', (req, res) => {
-      res.send(createReadStream(join(app.sourceDirectory, 'www/index.html')))
+    server.register(fstatic, {
+      wildcard: false,
+      root: join(app.sourceDirectory, 'www/assets'),
+      decorateReply: false,
     })
+
+    // server.get('/*', (req, res) => {
+    //   res.send(createReadStream(join(app.sourceDirectory, 'www/index.html')))
+    // })
 
     await server.listen({
       port: _port,

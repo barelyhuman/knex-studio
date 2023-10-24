@@ -1,7 +1,10 @@
 import esbuild from 'esbuild'
 import { mkdir } from 'node:fs/promises'
-import { join, dirname } from 'path'
+import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+
+// default for server
+import.meta.env = 'server'
 
 export const app = {
   functions: {},
@@ -34,9 +37,7 @@ async function buildWebAssets(watch) {
   const entryFile = join(app.sourceDirectory, 'www', scriptFile)
   const outfile = join(app.sourceDirectory, 'www', 'dist', scriptFile)
   await mkdir(dirname(outfile), { recursive: true })
-  if (watch) {
-    //TODO: Write watcher
-  }
+
   await esbuild.build({
     entryPoints: [entryFile],
     bundle: true,
