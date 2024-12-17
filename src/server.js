@@ -10,7 +10,7 @@ import viewPlugin from './plugins/view.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export function createServer(knexInstance) {
-  const app = fastify()
+  const app = fastify({ logger: true })
 
   app.register(fastifyStatic, {
     root: join(__dirname, '_public'),
