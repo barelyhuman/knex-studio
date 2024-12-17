@@ -14,7 +14,8 @@
     "db:rollback": "knex migrate:rollback --esm",
     "db:reset": "knex migrate:rollback --all --esm; knex migrate:latest --esm",
     "fix": "biome check --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "next": "bumpp"
   },
   "nano-staged": {
     "*.{js,json}": ["biome check --write"]
@@ -24,6 +25,7 @@
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "bumpp": "^9.9.1",
     "husky": "^9.1.7",
     "nano-staged": "^0.8.0",
     "nodemon": "^3.1.9"

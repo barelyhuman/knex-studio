@@ -48,7 +48,7 @@ export default fp(
         linkStyle: file => {
           if (!metafile.inputs[file]) {
             throw new Error(
-              `cannot \`inlineScript\` since the provided asset doesn't exisst ${scriptName}`
+              `cannot \`inlineScript\` since the provided asset doesn't exisst ${file}`
             )
           }
 
