@@ -1,31 +1,39 @@
 {
   "name": "knex-studio",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple table data visualizer based on knex config",
   "type": "module",
   "main": "./src/index.mjs",
   "bin": {
     "knex-studio": "./src/cli.mjs"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "dev": "nodemon -e 'njk,js,css' -i 'src/_public' -i 'src/metafile.js' src/cli.mjs ./knexfile.mjs",
     "db:latest": "knex migrate:latest --esm",
     "db:rollback": "knex migrate:rollback --esm",
     "db:reset": "knex migrate:rollback --all --esm; knex migrate:latest --esm",
-    "fix": "biome check --write"
+    "fix": "biome check --write",
+    "prepare": "husky"
+  },
+  "nano-staged":{
+    ".js":["biome check --write"]
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "husky": "^9.1.7",
+    "nano-staged": "^0.8.0",
     "nodemon": "^3.1.9"
   },
   "dependencies": {
-    "esbuild": "^0.24.0",
     "@fastify/static": "^8.0.3",
     "@fastify/view": "^10.0.1",
+    "esbuild": "^0.24.0",
     "fastify": "^5.2.0",
     "fastify-plugin": "^5.0.1",
     "knex-schema-inspector": "^3.1.0",
