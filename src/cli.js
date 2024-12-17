@@ -2,7 +2,7 @@
 import { resolve } from 'node:path'
 import knex from 'knex'
 import mri from 'mri'
-import { studio } from './index.mjs'
+import { studio } from './index.js'
 
 async function main() {
   const args = mri(process.argv.slice(2))

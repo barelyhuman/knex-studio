@@ -3,11 +3,11 @@
   "version": "0.0.4-beta.1",
   "description": "Simple table data visualizer based on knex config",
   "type": "module",
-  "main": "./src/index.mjs",
+  "exports": "./dist/index.js",
   "bin": {
-    "knex-studio": "./src/cli.mjs"
+    "knex-studio": "./dist/cli.js"
   },
-  "files": ["src"],
+  "files": ["dist"],
   "scripts": {
     "dev": "nodemon -e 'njk,js,css' -i 'src/_public' -i 'src/metafile.js' src/cli.mjs ./knexfile.mjs",
     "db:latest": "knex migrate:latest --esm",
@@ -26,6 +26,9 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "bumpp": "^9.9.1",
+    "esbuild-node-externals": "^1.16.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-node-externals": "^1.0.1",
     "husky": "^9.1.7",
     "nano-staged": "^0.8.0",
     "nodemon": "^3.1.9"

@@ -13,8 +13,8 @@ export function createServer(knexInstance) {
   const app = fastify({ logger: true })
 
   app.register(fastifyStatic, {
-    root: join(__dirname, '_public'),
-    prefix: '/_public',
+    root: fileURLToPath(new URL('assets', import.meta.url)),
+    prefix: '/assets',
   })
 
   app.register(view, {
@@ -22,7 +22,7 @@ export function createServer(knexInstance) {
     engine: {
       nunjucks: njk,
     },
-    templates: [join(__dirname, './views')],
+    templates: [fileURLToPath(new URL('views', import.meta.url))],
   })
 
   app.register(viewPlugin).register(dbPlugin, {
