@@ -1,6 +1,6 @@
 {
   "name": "knex-studio",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple table data visualizer based on knex config",
   "type": "module",
   "main": "./src/index.mjs",
