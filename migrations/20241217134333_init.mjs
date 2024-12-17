@@ -27,5 +27,7 @@ export const up = async knex => {
  * @returns { Promise<void> }
  */
 export const down = async knex => {
-  return knex.schema.dropTableIfExists('user')
+  return knex.schema
+    .dropTableIfExists('user_membership')
+    .dropTableIfExists('user')
 }

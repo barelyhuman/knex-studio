@@ -1,0 +1,19 @@
+<nav>
+  <div class="mb-2 w-100">
+    <a class="w-100 btn btn-secondary" href="/raw">RAW SQL</a>
+  </div>
+  <ul class="list-group">
+    {% for table in tables %}
+    <li class="list-group-item">
+      <a
+        class="link-underline link-dark link-underline-opacity-0"
+        href="/?tableName={{ table }}"
+      >
+        {{ table }}
+      </a>
+    </li>
+    {%else%}
+    <li>No tables...</li>
+    {% endfor %}
+  </ul>
+</nav>

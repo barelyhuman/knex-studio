@@ -1,53 +1,79 @@
-import DatabaseAdaptorKnex from './adaptors/database-knex.js'
-import { app } from './app.js'
-import { fastifyArrow } from './lib/plugins/fastify-arrow.js'
-import routeRegister from './routes.js'
-import fstatic from '@fastify/static'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+import fastifyStatic from '@fastify/static'
+import view from '@fastify/view'
 import fastify from 'fastify'
-import { join } from 'node:path'
+import njk from 'nunjucks'
+import dbPlugin from './plugins/db.js'
+import viewPlugin from './plugins/view.js'
 
-const defaults = {
-  port: 4321,
-}
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export const createServer = _knexInstance => {
-  const server = fastify()
-  app.server = server
-  app.router = server
-  app.knex = _knexInstance
+export function createServer(knexInstance) {
+  const app = fastify()
 
-  app.addModule(DatabaseAdaptorKnex).addModule(routeRegister)
-
-  server.register(fastifyArrow, {
-    sourceDirectory: app.sourceDirectory,
+  app.register(fastifyStatic, {
+    root: join(__dirname, '_public'),
+    prefix: '/_public',
   })
 
-  /**
-   * @params {number} port
-   */
-  return async port => {
-    const _port = port || defaults.port
+  app.register(view, {
+    propertyName: '_view',
+    engine: {
+      nunjucks: njk,
+    },
+    templates: [join(__dirname, './views')],
+  })
 
-    await app.loadModules()
+  app.register(viewPlugin).register(dbPlugin, {
+    knexInstance: knexInstance,
+  })
 
-    server.register(fstatic, {
-      wildcard: false,
-      root: join(app.sourceDirectory, 'www/dist'),
-    })
+  app.get('/raw', async (req, res) => {
+    const tables = await app.dbSchemaInspector.tables()
+    return res.view('raw.njk', { tables, data: [] })
+  })
 
-    server.register(fstatic, {
-      wildcard: false,
-      root: join(app.sourceDirectory, 'www/assets'),
-      decorateReply: false,
-    })
+  app.post('/api/raw', async (req, res) => {
+    const data = req.body
+    const query = Buffer.from(data, 'base64url').toString('utf8')
+    const result = await app.db
+      .raw(query)
+      .then(d => {
+        return {
+          success: true,
+          data: d,
+        }
+      })
+      .catch(err => {
+        return { success: false, error: { message: err.message } }
+      })
 
-    // server.get('/*', (req, res) => {
-    //   res.send(createReadStream(join(app.sourceDirectory, 'www/index.html')))
-    // })
+    if (!result.success) {
+      res.code(400)
+      return result
+    }
 
-    await server.listen({
-      port: _port,
-    })
-    process.stdout.write(`Listening on http://localhost:${_port}\n`)
-  }
+    const headings = [...Object.keys(result.data[0])]
+
+    const dataWithoutHeadings = result.data.map(d => headings.map(h => d[h]))
+
+    return { success: true, headings, data: dataWithoutHeadings }
+  })
+
+  app.get('/', async (req, res) => {
+    const query = req.query
+    const tableName = query.tableName ?? ''
+    let columns = []
+    let data = []
+    if (tableName) {
+      columns = await app.dbSchemaInspector.columnInfo(tableName)
+      data = await app.db(tableName).where({})
+    }
+
+    const tables = await app.dbSchemaInspector.tables()
+    return res.view('index.njk', { tables, columns, data })
+  })
+
+  return app
 }

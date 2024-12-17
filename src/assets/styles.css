@@ -1,0 +1,31 @@
+.datatable-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.datatable-sorter {
+  background: transparent;
+  border: 0;
+  outline: black;
+}
+
+.datatable-sorter::after {
+  content: "↕";
+  margin-left: 1em;
+}
+
+.datatable-ascending .datatable-sorter::after {
+  content: "↓";
+}
+
+.datatable-descending .datatable-sorter::after {
+  content: "↑";
+}
+
+.datatable-dropdown > label {
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

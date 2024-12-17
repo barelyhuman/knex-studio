@@ -1,5 +1,8 @@
-/node_modules 
-dist 
-.DS_Store
+src/_public
+src/metafile.js
+
+node_modules
 
 *.sqlite3
+
+.DS_Store

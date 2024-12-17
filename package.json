@@ -1,62 +1,41 @@
 {
   "name": "knex-studio",
-  "version": "0.0.0",
-  "description": "A knex.js data explorer",
-  "module": "./src/index.js",
-  "main": "./dist/index.cjs",
+  "version": "1.0.0",
+  "description": "",
   "type": "module",
+  "main": "./src/index.mjs",
+  "bin": {
+    "knex-studio": "./src/cli.js"
+  },
   "scripts": {
-    "dev": "nodemon playground/dummy-server.js --ignore ./src/www/dist",
-    "build": "sucrase --transforms='jsx,imports' -d dist src; pnpm copy",
-    "copy": "pnpm copy:runtime",
-    "copy:runtime": "copyfiles -u 1 './src/runtime/**/*' ./dist",
-    "fix": "prettier --write ."
+    "dev": "nodemon -e 'njk,js,css' -i 'src/_public' -i 'src/metafile.js' src/cli.mjs ./knexfile.mjs",
+    "db:latest": "knex migrate:latest --esm",
+    "db:rollback": "knex migrate:rollback --esm",
+    "db:reset": "knex migrate:rollback --all --esm; knex migrate:latest --esm"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.js",
-      "default": "./src/index.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "./cjs",
-    "./src"
-  ],
   "keywords": [],
-  "author": "reaper<ahoy@barelyhuman.dev>",
-  "license": "MIT",
-  "dependencies": {
-    "@arrow-js/core": "1.0.0-alpha.9",
-    "@fastify/static": "^6.11.2",
-    "@twind/core": "^1.1.3",
-    "@twind/preset-autoprefix": "^1.0.7",
-    "@twind/preset-tailwind": "^1.1.4",
-    "acorn": "^8.10.0",
-    "arrow-render-to-string": "0.0.2-beta.0",
-    "astring": "^1.8.6",
-    "fastify": "^4.23.2",
-    "fastify-plugin": "^4.5.1",
-    "knex-schema-inspector": "^3.0.1",
-    "ms": "^2.1.3",
-    "rollup": "^4.1.4",
-    "uglify-js": "^3.17.4"
-  },
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "@barelyhuman/prettier-config": "^1.1.0",
-    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
-    "copyfiles": "^2.4.1",
-    "esbuild": "^0.19.4",
-    "knex": "^3.0.1",
-    "lodash": "^4.17.21",
-    "nodemon": "^3.0.1",
-    "prettier": "^3.0.3",
-    "sqlite3": "^5.1.6",
-    "sucrase": "^3.34.0",
+    "@biomejs/biome": "^1.9.4",
+    "@preact/preset-vite": "^2.9.1",
+    "esbuild": "^0.24.0",
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "@fastify/static": "^8.0.3",
+    "@fastify/view": "^10.0.1",
+    "fastify": "^5.2.0",
+    "fastify-plugin": "^5.0.1",
+    "knex-schema-inspector": "^3.1.0",
+    "mri": "^1.2.0",
+    "nunjucks": "^3.2.4",
+    "preact": "^10.25.0",
+    "simple-datatables": "^9.2.1",
+    "sqlite3": "^5.1.7",
     "tiny-glob": "^0.2.9"
   },
   "peerDependencies": {
-    "knex": "^3.0.1"
+    "knex": "^3.1.0"
   }
 }
