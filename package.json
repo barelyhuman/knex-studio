@@ -7,9 +7,7 @@
   "bin": {
     "knex-studio": "./src/cli.mjs"
   },
-  "files": [
-    "src"
-  ],
+  "files": ["src"],
   "scripts": {
     "dev": "nodemon -e 'njk,js,css' -i 'src/_public' -i 'src/metafile.js' src/cli.mjs ./knexfile.mjs",
     "db:latest": "knex migrate:latest --esm",
@@ -18,8 +16,8 @@
     "fix": "biome check --write",
     "prepare": "husky"
   },
-  "nano-staged":{
-    ".js":["biome check --write"]
+  "nano-staged": {
+    "*.{js,json}": ["biome check --write"]
   },
   "keywords": [],
   "author": "",
