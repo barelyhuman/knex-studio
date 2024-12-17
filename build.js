@@ -1,6 +1,7 @@
 import { build } from 'esbuild'
 import { copy } from 'esbuild-plugin-copy'
 import { nodeExternals } from 'esbuild-plugin-node-externals'
+import pino from 'esbuild-plugin-pino'
 import glob from 'tiny-glob'
 
 await build({
@@ -8,10 +9,13 @@ await build({
   format: 'esm',
   bundle: true,
   treeShaking: true,
-  //   splitting: true,
+  splitting: true,
   platform: 'node',
   outdir: 'dist',
   plugins: [
+    pino({
+      transports: ['pino-pretty'],
+    }),
     nodeExternals(),
     copy({
       assets: [
@@ -34,8 +38,7 @@ await build({
   bundle: true,
   entryNames: '[dir]/[name]',
   treeShaking: true,
-  //   splitting: true,
+  splitting: true,
   platform: 'browser',
   outdir: 'dist/assets',
-  plugins: [nodeExternals()],
 })

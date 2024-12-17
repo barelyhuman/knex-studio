@@ -17,6 +17,8 @@ form.addEventListener('submit', e => {
 async function fetchResult(query) {
   try {
     document.querySelector('#result-error').textContent = ''
+    document.querySelector('#result-success').textContent = ''
+
     const result = await fetch('/api/raw', {
       method: 'POST',
       body: btoa(query),
@@ -26,6 +28,10 @@ async function fetchResult(query) {
       }
       return d.json()
     })
+
+    if (result.success) {
+      document.querySelector('#result-success').textContent = 'Query Run'
+    }
 
     mountTable('#datatable-result', {
       data: result,
